@@ -1,0 +1,97 @@
+# Docker Compose configuration for the e-commerce event processing system
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ecommerce_events
+      POSTGRES_USER: spark_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-PING", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  spark-master:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.spark
+    environment:
+      SPARK_MODE: master
+      SPARK_MASTER_PORT: 7077
+    ports:
+      - "8080:8080"  # Spark UI
+      - "7077:7077"  # Spark master
+    volumes:
+      - ./src/spark_jobs:/opt/spark/jobs
+      - ./data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  spark-worker:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.spark
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_WORKER_MEMORY: 2G
+      SPARK_WORKER_CORES: 2
+    depends_on:
+      - spark-master
+    volumes:
+      - ./data:/data
+    deploy:
+      replicas: 2  # 2 workers for parallelism
+
+  airflow-webserver:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.airflow
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    ports:
+      - "8081:8080"  # Airflow UI
+    depends_on:
+      - postgres
+    volumes:
+      - ./src/airflow_dags:/opt/airflow/dags
+      - ./data/logs:/opt/airflow/logs
+
+  airflow-scheduler:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.airflow
+    command: scheduler
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    depends_on:
+      - postgres
+    volumes:
+      - ./src/airflow_dags:/opt/airflow/dags
+      - ./data/logs:/opt/airflow/logs
+
+  data-generator:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.generator
+    volumes:
+      - ./data/streaming:/data/output
+    environment:
+      GENERATION_INTERVAL: 30  # seconds
+      EVENTS_PER_FILE: 100
+
+volumes:
+  postgres_data:
+  airflow_logs:
