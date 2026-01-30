@@ -1,0 +1,52 @@
+# Dockerfile.spark
+# Custom Spark image with PostgreSQL JDBC driver and Python dependencies
+
+FROM spark:3.5.7-python3
+
+USER root
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    vim \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create necessary directories
+RUN mkdir -p /opt/spark-jobs \
+    && mkdir -p /data/streaming \
+    && mkdir -p /data/checkpoints \
+    && mkdir -p /data/archive \
+    && mkdir -p /data/logs
+
+# Download PostgreSQL JDBC driver
+RUN wget https://jdbc.postgresql.org/download/postgresql-42.6.0.jar \
+    -O /opt/spark/jars/postgresql-42.6.0.jar
+
+# Install Python dependencies for PySpark jobs
+RUN pip install --no-cache-dir \
+    pandas==2.1.4 \
+    numpy==1.26.3 \
+    psycopg2-binary==2.9.9 \
+    python-dotenv==1.0.0
+
+# Set environment variables
+ENV SPARK_HOME=/opt/spark
+ENV PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
+ENV PYSPARK_PYTHON=python3
+ENV PYSPARK_DRIVER_PYTHON=python3
+
+# Set proper permissions
+# Ensure proper permissions
+RUN chown -R root:root /opt/spark-jobs /data
+
+# Working directory
+WORKDIR /opt/spark
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8080 || exit 1
+
+# Default command (will be overridden by docker-compose)
+CMD ["bin/spark-class", "org.apache.spark.deploy.master.Master"]
