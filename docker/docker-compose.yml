@@ -1,97 +1,256 @@
-# Docker Compose configuration for the e-commerce event processing system
-version: '3.8'
+# Real-Time E-commerce Data Pipeline
+# Services: PostgreSQL, Spark (Master + Workers), Airflow, Data Generator
+
 services:
+  # ==========================================
+  # PostgreSQL Database (shared by app and Airflow)
+  # ==========================================
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
+    container_name: ecommerce-postgres
     environment:
       POSTGRES_DB: ecommerce_events
       POSTGRES_USER: spark_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-spark_password}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./sql:/docker-entrypoint-initdb.d
+      - ../sql:/docker-entrypoint-initdb.d:ro
     ports:
       - "5432:5432"
+    networks:
+      - ecommerce_network
     healthcheck:
-      test: ["CMD-PING", "pg_isready"]
+      test: ["CMD-SHELL", "pg_isready -U spark_user -d ecommerce_events"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
+  # ==========================================
+  # Spark Master
+  # ==========================================
   spark-master:
     build:
-      context: ./docker
-      dockerfile: Dockerfile.spark
+      context: ..
+      dockerfile: docker/Dockerfile.spark
+    container_name: ecommerce-spark-master
     environment:
-      SPARK_MODE: master
-      SPARK_MASTER_PORT: 7077
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8080
     ports:
-      - "8080:8080"  # Spark UI
-      - "7077:7077"  # Spark master
+      - "8080:8080"  # Spark Master UI
+      - "7077:7077"  # Spark Master Port
     volumes:
-      - ./src/spark_jobs:/opt/spark/jobs
-      - ./data:/data
+      - ../src/spark_jobs:/opt/spark-jobs
+      - ../data:/data
+    networks:
+      - ecommerce_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
+    restart: unless-stopped
 
-  spark-worker:
+  # ==========================================
+  # Spark Worker 1
+  # ==========================================
+  spark-worker-1:
     build:
-      context: ./docker
-      dockerfile: Dockerfile.spark
+      context: ..
+      dockerfile: docker/Dockerfile.spark
+    container_name: ecommerce-spark-worker-1
     environment:
-      SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark-master:7077
-      SPARK_WORKER_MEMORY: 2G
-      SPARK_WORKER_CORES: 2
-    depends_on:
-      - spark-master
-    volumes:
-      - ./data:/data
-    deploy:
-      replicas: 2  # 2 workers for parallelism
-
-  airflow-webserver:
-    build:
-      context: ./docker
-      dockerfile: Dockerfile.airflow
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_PORT=8881
+      - SPARK_WORKER_WEBUI_PORT=8081
     ports:
-      - "8081:8080"  # Airflow UI
+      - "8081:8081"  # Worker 1 UI
     depends_on:
-      - postgres
+      spark-master:
+        condition: service_healthy
     volumes:
-      - ./src/airflow_dags:/opt/airflow/dags
-      - ./data/logs:/opt/airflow/logs
+      - ../data:/data
+    networks:
+      - ecommerce_network
+    restart: unless-stopped
 
-  airflow-scheduler:
+  # ==========================================
+  # Spark Worker 2 (Optional - for scaling)
+  # ==========================================
+  spark-worker-2:
     build:
-      context: ./docker
-      dockerfile: Dockerfile.airflow
-    command: scheduler
+      context: ..
+      dockerfile: docker/Dockerfile.spark
+    container_name: ecommerce-spark-worker-2
     environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_PORT=8882
+      - SPARK_WORKER_WEBUI_PORT=8082
+    ports:
+      - "8082:8082"  # Worker 2 UI
     depends_on:
-      - postgres
+      spark-master:
+        condition: service_healthy
     volumes:
-      - ./src/airflow_dags:/opt/airflow/dags
-      - ./data/logs:/opt/airflow/logs
+      - ../data:/data
+    networks:
+      - ecommerce_network
+    restart: unless-stopped
+    profiles:
+      - scale  # Only start if using profile: docker-compose --profile scale up
 
+  # ==========================================
+  # Data Generator
+  # ==========================================
   data-generator:
     build:
-      context: ./docker
-      dockerfile: Dockerfile.generator
-    volumes:
-      - ./data/streaming:/data/output
+      context: ..
+      dockerfile: docker/Dockerfile.generator
+    container_name: ecommerce-data-generator
     environment:
-      GENERATION_INTERVAL: 30  # seconds
-      EVENTS_PER_FILE: 100
+      OUTPUT_DIR: /data/streaming
+      EVENTS_PER_FILE: ${EVENTS_PER_FILE:-100}
+      GENERATION_INTERVAL: ${GENERATION_INTERVAL:-30}
+    volumes:
+      - ../data/streaming:/data/streaming
+      - ../src/data_generator:/app/data_generator
+    networks:
+      - ecommerce_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ==========================================
+  # Airflow PostgreSQL Database
+  # ==========================================
+  airflow-postgres:
+    image: postgres:15-alpine
+    container_name: airflow-postgres
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: ${AIRFLOW_POSTGRES_PASSWORD:-airflow}
+    volumes:
+      - airflow_postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    profiles:
+      - airflow
+
+  # ==========================================
+  # Airflow Webserver
+  # ==========================================
+  airflow-webserver:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.airflow
+    container_name: airflow-webserver
+    command: >
+      bash -c "airflow db init &&
+               airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com || true &&
+               airflow webserver"
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY:-46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=}
+      - AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW_SECRET_KEY:-secret}
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=ecommerce_events
+      - POSTGRES_USER=spark_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-spark_password}
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    ports:
+      - "8090:8080"  # Airflow UI (different from Spark UI)
+    volumes:
+      - ../src/airflow_dags:/opt/airflow/dags
+      - ../data/logs/airflow:/opt/airflow/logs
+      - ../src/airflow_dags/plugins:/opt/airflow/plugins
+    networks:
+      - ecommerce_network
+    depends_on:
+      airflow-postgres:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      spark-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    profiles:
+      - airflow
+
+  # ==========================================
+  # Airflow Scheduler
+  # ==========================================
+  airflow-scheduler:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.airflow
+    container_name: airflow-scheduler
+    command: airflow scheduler
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY:-46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=ecommerce_events
+      - POSTGRES_USER=spark_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-spark_password}
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    volumes:
+      - ../src/airflow_dags:/opt/airflow/dags
+      - ../data/logs/airflow:/opt/airflow/logs
+      - ../src/airflow_dags/plugins:/opt/airflow/plugins
+    networks:
+      - ecommerce_network
+    depends_on:
+      airflow-webserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "airflow", "jobs", "check", "--job-type", "SchedulerJob"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    profiles:
+      - airflow
+
+networks:
+  ecommerce_network:
+    driver: bridge
+    name: ecommerce_network
 
 volumes:
   postgres_data:
-  airflow_logs:
+    name: ecommerce_postgres_data
+  airflow_postgres_data:
+    name: airflow_postgres_data
