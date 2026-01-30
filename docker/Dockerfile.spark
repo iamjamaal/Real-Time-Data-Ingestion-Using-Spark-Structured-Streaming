@@ -26,14 +26,16 @@ RUN wget https://jdbc.postgresql.org/download/postgresql-42.6.0.jar \
 
 # Install Python dependencies for PySpark jobs
 RUN pip install --no-cache-dir \
+    Faker==22.0.0 \
     pandas==2.1.4 \
     numpy==1.26.3 \
     psycopg2-binary==2.9.9 \
-    python-dotenv==1.0.0
+    python-dotenv==1.0.0 \
+    pytest==9.0.2
 
 # Set environment variables
 ENV SPARK_HOME=/opt/spark
-ENV PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
+ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9.7-src.zip:$PYTHONPATH
 ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
 

@@ -1,6 +1,8 @@
 import pytest
 import time
 import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
 from src.data_generator.generator import EcommerceEventGenerator
 from src.spark_jobs.streaming_to_postgres import EcommerceStreamProcessor
 
@@ -18,6 +20,21 @@ def test_full_pipeline():
     test_dir = "/tmp/test_streaming"
     os.makedirs(test_dir, exist_ok=True)
     
+    # Clean target table
+    import psycopg2
+    conn = psycopg2.connect(
+        host="postgres",
+        port=5432,
+        dbname="ecommerce_events",
+        user="spark_user",
+        password="spark_password"
+    )
+    cur = conn.cursor()
+    cur.execute("TRUNCATE TABLE ecommerce_events")
+    conn.commit()
+    cur.close()
+    conn.close()
+    
     # Generate test data
     generator = EcommerceEventGenerator(output_dir=test_dir, events_per_file=10)
     generator.generate_file(1)
@@ -30,12 +47,16 @@ def test_full_pipeline():
     time.sleep(10)
     
     # Verify data in PostgreSQL
-    from airflow.providers.postgres.hooks.postgres import PostgresHook
-    hook = PostgresHook(postgres_conn_id='postgres_test')
-    result = hook.get_first("SELECT COUNT(*) FROM ecommerce_events")
-    
-    assert result[0] == 10, f"Expected 10 records, found {result[0]}"
+    conn = psycopg2.connect(host="postgres", port=5432, dbname="ecommerce_events",
+                            user="spark_user", password="spark_password")
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM ecommerce_events")
+    count = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    assert count == 10, f"Expected 10 records, found {count}"
     
     # Cleanup
     query.stop()
-    os.rmdir(test_dir)
+    import shutil
+    shutil.rmtree(test_dir, ignore_errors=True)

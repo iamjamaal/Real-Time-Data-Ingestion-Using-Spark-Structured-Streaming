@@ -44,6 +44,8 @@ services:
     volumes:
       - ../src/spark_jobs:/opt/spark-jobs
       - ../data:/data
+      - ../tests:/opt/tests:ro
+      - ../src:/opt/src:ro
     networks:
       - ecommerce_network
     healthcheck:
