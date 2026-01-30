@@ -2,9 +2,7 @@
 # Services: PostgreSQL, Spark (Master + Workers), Airflow, Data Generator
 
 services:
-  # ==========================================
-  # PostgreSQL Database (shared by app and Airflow)
-  # ==========================================
+  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: ecommerce-postgres
@@ -26,9 +24,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # ==========================================
   # Spark Master
-  # ==========================================
   spark-master:
     build:
       context: ..
@@ -58,9 +54,7 @@ services:
       start_period: 40s
     restart: unless-stopped
 
-  # ==========================================
   # Spark Worker 1
-  # ==========================================
   spark-worker-1:
     build:
       context: ..
@@ -84,9 +78,8 @@ services:
       - ecommerce_network
     restart: unless-stopped
 
-  # ==========================================
-  # Spark Worker 2 (Optional - for scaling)
-  # ==========================================
+
+  # Spark Worker 2 
   spark-worker-2:
     build:
       context: ..
@@ -112,9 +105,8 @@ services:
     profiles:
       - scale  # Only start if using profile: docker-compose --profile scale up
 
-  # ==========================================
+
   # Data Generator
-  # ==========================================
   data-generator:
     build:
       context: ..
@@ -134,9 +126,8 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # ==========================================
+
   # Airflow PostgreSQL Database
-  # ==========================================
   airflow-postgres:
     image: postgres:15-alpine
     container_name: airflow-postgres
@@ -157,9 +148,8 @@ services:
     profiles:
       - airflow
 
-  # ==========================================
+
   # Airflow Webserver
-  # ==========================================
   airflow-webserver:
     build:
       context: ..
@@ -206,9 +196,8 @@ services:
     profiles:
       - airflow
 
-  # ==========================================
+
   # Airflow Scheduler
-  # ==========================================
   airflow-scheduler:
     build:
       context: ..

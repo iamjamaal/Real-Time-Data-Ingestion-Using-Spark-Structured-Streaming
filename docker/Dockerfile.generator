@@ -4,7 +4,7 @@
 FROM python:3.11-slim
 
 # Set labels
-LABEL maintainer="Data Engineering Team"
+LABEL maintainer="noah_jamal_nabila"
 LABEL description="E-commerce event data generator"
 LABEL version="1.0"
 
