@@ -30,8 +30,8 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.spark
     container_name: ecommerce-spark-master
+    command: bin/spark-class org.apache.spark.deploy.master.Master --host 0.0.0.0 --port 7077 --webui-port 8080
     environment:
-      - SPARK_MODE=master
       - SPARK_RPC_AUTHENTICATION_ENABLED=no
       - SPARK_RPC_ENCRYPTION_ENABLED=no
       - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
@@ -60,13 +60,11 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.spark
     container_name: ecommerce-spark-worker-1
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077 --webui-port 8081
     environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
       - SPARK_WORKER_MEMORY=2G
       - SPARK_WORKER_CORES=2
       - SPARK_WORKER_PORT=8881
-      - SPARK_WORKER_WEBUI_PORT=8081
     ports:
       - "8081:8081"  # Worker 1 UI
     depends_on:
@@ -76,6 +74,12 @@ services:
       - ../data:/data
     networks:
       - ecommerce_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
 
 
@@ -85,15 +89,13 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.spark
     container_name: ecommerce-spark-worker-2
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077 --webui-port 8081
     environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
       - SPARK_WORKER_MEMORY=2G
       - SPARK_WORKER_CORES=2
       - SPARK_WORKER_PORT=8882
-      - SPARK_WORKER_WEBUI_PORT=8082
     ports:
-      - "8082:8082"  # Worker 2 UI
+      - "8082:8081"  # Worker 2 UI
     depends_on:
       spark-master:
         condition: service_healthy
@@ -101,6 +103,12 @@ services:
       - ../data:/data
     networks:
       - ecommerce_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     restart: unless-stopped
     profiles:
       - scale  # Only start if using profile: docker-compose --profile scale up
