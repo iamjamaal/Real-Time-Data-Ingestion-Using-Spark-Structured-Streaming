@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.tox/
+.coverage
+coverage.xml
+
+# Virtual environments
+venv/
+.venv/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+docker/.env
+
+# Spark runtime data
+data/streaming/
+data/checkpoints/
+data/archive/
+data/logs/
+
+# Airflow logs (host-mounted)
+data/logs/airflow/
+
+# Docker build artifacts
+*.log
+
+# JAR binaries (fetched in Docker image)
+jars/*.jar
