@@ -1,0 +1,55 @@
+# Dockerfile.airflow
+# Apache Airflow for pipeline orchestration and monitoring
+
+FROM apache/airflow:2.8.1-python3.11
+
+USER root
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    postgresql-client \
+    curl \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create necessary directories
+RUN mkdir -p /opt/airflow/dags \
+    && mkdir -p /opt/airflow/logs \
+    && mkdir -p /opt/airflow/plugins \
+    && mkdir -p /opt/airflow/config
+
+USER airflow
+
+# Install additional Python packages for Airflow DAGs
+RUN pip install --no-cache-dir \
+    apache-airflow-providers-postgres==5.10.0 \
+    apache-airflow-providers-apache-spark==4.6.0 \
+    apache-airflow-providers-http==4.8.0 \
+    psycopg2-binary==2.9.9 \
+    pandas==2.1.4 \
+    requests==2.31.0 \
+    python-dotenv==1.0.0 \
+    pyspark==3.5.0
+
+# Set environment variables
+ENV AIRFLOW_HOME=/opt/airflow
+ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
+ENV AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS=False
+ENV AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
+ENV AIRFLOW__WEBSERVER__RBAC=True
+ENV AIRFLOW__CORE__EXECUTOR=LocalExecutor
+ENV AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
+ENV AIRFLOW__CORE__BASE_LOG_FOLDER=/opt/airflow/logs
+ENV AIRFLOW__CORE__PLUGINS_FOLDER=/opt/airflow/plugins
+ENV AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL=30
+ENV AIRFLOW__CORE__ENABLE_XCOM_PICKLING=True
+
+# Create airflow user and initialize database
+# (This will be overridden by entrypoint in docker-compose)
+
+WORKDIR /opt/airflow
+
+# Default command (will be overridden by docker-compose)
+CMD ["airflow", "webserver"]
