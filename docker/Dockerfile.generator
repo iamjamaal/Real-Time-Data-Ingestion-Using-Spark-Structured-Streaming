@@ -1,0 +1,54 @@
+# Dockerfile.generator
+# Data generator service for creating e-commerce events
+
+FROM python:3.11-slim
+
+# Set labels
+LABEL maintainer="Data Engineering Team"
+LABEL description="E-commerce event data generator"
+LABEL version="1.0"
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Create app user (non-root for security)
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first (for better caching)
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY src/data_generator/ ./data_generator/
+
+# Create output directory
+RUN mkdir -p /data/streaming && \
+    chown -R appuser:appuser /app /data
+
+# Switch to non-root user
+USER appuser
+
+# Healthcheck - verify the generator script exists
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD python -c "import data_generator.generator" || exit 1
+
+# Set default environment variables (can be overridden)
+ENV OUTPUT_DIR=/data/streaming \
+    EVENTS_PER_FILE=100 \
+    GENERATION_INTERVAL=30
+
+# Run the generator
+CMD ["python", "-m", "data_generator.generator"]
