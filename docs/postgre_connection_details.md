@@ -22,13 +22,6 @@ Connection Test Command:
 ------------------------
 docker exec ecommerce-postgres psql -U spark_user -d ecommerce_events -c "\dt"
 
-Security Notes:
----------------
-- These credentials are for development/testing purposes only
-- In production, use environment variables or secret management systems
-- Never commit credentials to version control
-- Consider using connection pooling for better performance
-
 Table Information:
 ------------------
 Table Name: ecommerce_events
