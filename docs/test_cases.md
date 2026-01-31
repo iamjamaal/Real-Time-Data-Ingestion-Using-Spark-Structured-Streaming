@@ -123,24 +123,9 @@ Workers Allocated:
 Cores Allocated:
 ```
 
-#### Step 2.2: Verify File Monitoring
-```powershell
-# Check Spark logs for file detection
-docker logs ecommerce-spark-master 2>&1 | Select-String "FileStreamSource"
-```
 
-**Expected Result:**
-- Logs show files being listed
-- Log entries like: "Listed X files"
-- No "File not found" errors
 
-**Actual Result:** ✅ PASS / ❌ FAIL  
-**Log Excerpt:**
-```
-[Paste relevant log lines here]
-```
-
-#### Step 2.3: Confirm Batch Processing
+#### Step 2.2: Confirm Batch Processing
 ```powershell
 # Look for batch completion messages
 docker logs ecommerce-spark-master 2>&1 | Select-String "Batch"
