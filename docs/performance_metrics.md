@@ -734,7 +734,7 @@ The real-time e-commerce data pipeline demonstrates strong performance character
 
 **Final Recommendation:**
 ```
-✅ APPROVED FOR PRODUCTION (with conditions)
+ APPROVED FOR PRODUCTION (with conditions)
 
 This pipeline is production-ready for:
 - Low-to-medium volume workloads (< 10 events/sec)
@@ -754,92 +754,4 @@ Time to Production-Ready: 2-3 weeks of additional development
 Risk Assessment: Low (well-tested, proven architecture)
 ```
 
----
 
-## Appendices
-
-### Appendix A: Test Environment
-
-```
-Hardware:
-- CPU: Intel Core i7 (4 cores, 8 threads)
-- RAM: 16 GB DDR4
-- Storage: 512 GB SSD
-- Network: 1 Gbps Ethernet
-
-Software:
-- OS: Windows 11 Pro (Build 22631)
-- Docker Desktop: 4.27.2
-- Docker Engine: 25.0.2
-- Docker Compose: 2.24.5
-
-Containers:
-- Spark Master: bitnami/spark:3.5.7
-- Spark Worker: bitnami/spark:3.5.7 (2 cores, 2GB RAM)
-- PostgreSQL: postgres:15-alpine (512MB RAM)
-- Data Generator: Python 3.11 (256MB RAM)
-
-Network:
-- Type: Docker bridge network (ecommerce_network)
-- MTU: 1500
-- Internal bandwidth: 10 Gbps (virtual)
-```
-
-### Appendix B: Measurement Methodology
-
-```
-Data Collection:
-- Automated PowerShell scripts run every 10 seconds
-- Manual SQL queries for database metrics
-- Docker stats API for resource monitoring
-- Spark logs parsed for batch performance
-
-Measurement Period:
-- Primary: 24 hours (2026-01-30 14:00 to 2026-01-31 14:00)
-- Extended: 72 hours for trend analysis
-- Excluded: Initial 2-hour warm-up period
-
-Statistical Methods:
-- Averages: Arithmetic mean of all samples
-- Percentiles: Calculated using PostgreSQL PERCENTILE_CONT
-- Standard Deviation: Population standard deviation
-- Outlier Handling: Values > 3σ flagged but not excluded
-
-Validation:
-- All metrics cross-validated with multiple measurement tools
-- Database queries verified against CSV file counts
-- Resource metrics compared against Docker Desktop UI
-```
-
-### Appendix C: Raw Data
-
-```
-Raw performance data available in:
-- /data/metrics/performance_metrics_20260130.csv
-- /data/metrics/resource_usage_20260130.csv
-- /data/metrics/latency_distribution_20260130.csv
-- /data/logs/spark_batch_performance_20260130.log
-
-Data Format: CSV with timestamps
-Update Frequency: Every 10 seconds
-Retention: 30 days
-```
-
----
-
-## Revision History
-
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-01-31 | Noah Jamal Nabila | Initial performance report |
-
----
-
-**Report Prepared By:** Noah Jamal Nabila  
-**Date:** January 31, 2026  
-**Approved By:** _______________________ (Pending)  
-**Date:** _______________________ (Pending)
-
----
-
-**End of Report**
