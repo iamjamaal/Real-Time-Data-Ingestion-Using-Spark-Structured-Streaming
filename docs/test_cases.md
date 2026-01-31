@@ -158,14 +158,16 @@ Verify that Spark Structured Streaming detects and processes new CSV files
 docker logs ecommerce-spark-streaming 2>&1 | Select-String "FileStreamSource"
 ```
 
-> **⚠️ Note:** The original command targeted `ecommerce-spark-master`. Streaming application logs are produced by the `ecommerce-spark-streaming` container. All TC2 and TC5 log commands have been corrected to use the right container.
-
 **Expected Result:**
 - Logs show files being listed
+- Log entries like: "Listed X files"
 - No "File not found" errors
 
-**Actual Result:** ⬜ PENDING — `FileStreamSource` keyword not explicitly verified in corrected container  
-> The streaming job successfully reads from `/data/streaming` as confirmed by consistent batch output (39,710+ records written). Run this command against `ecommerce-spark-streaming` to formally verify the file detection logs.
+**Actual Result:** ✅ PASS / ❌ FAIL  
+**Log Excerpt:**
+```
+[Paste relevant log lines here]
+```
 
 #### Step 2.3: Confirm Batch Processing
 ```powershell
@@ -662,9 +664,10 @@ docker logs ecommerce-spark-streaming 2>&1 | Select-String "Batch" | Select-Obje
 
 ## Sign-off
 
-| Field | Value |
-|---|---|
-| **Tester** | Noah Jamal Nabila |
-| **Date** | January 31, 2026 |
-| **Status** | ⬜ In Progress |
-| **Comments** | Pipeline fully operational end-to-end. Data generator → Spark Structured Streaming → PostgreSQL confirmed working. 3 test cases remaining: explicit CSV validation, transformation queries, and error handling scenarios. |
+**Tester:** _______________________  
+**Date:** _________________________  
+**Status:** ⬜ Approved / ⬜ Rejected  
+**Comments:**
+```
+[Add final testing comments here]
+```
