@@ -26,12 +26,12 @@ This report documents the performance characteristics of the real-time e-commerc
 
 ### 1.1 Data Generation Rate
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| Batch Size | 100 events | 100 events | ✅ |
-| Batch Interval | 30 seconds | 30 seconds | ✅ |
-| Theoretical Max | 3.33 events/sec | ≥ 3 events/sec | ✅ |
-| Actual Generation Rate | 3.30 events/sec | ≥ 3 events/sec | ✅ |
+| Metric | Value | Target | 
+|--------|-------|--------|
+| Batch Size | 100 events |  
+| Batch Interval | 30 seconds | 30 seconds |
+| Theoretical Max | 3.33 events/sec | ≥ 3 events/sec |
+| Actual Generation Rate | 3.30 events/sec | ≥ 3 events/sec |
 
 **Measurement Period:** 5 minutes (300 seconds)
 
@@ -46,12 +46,12 @@ Events/Second: 3.30 events/sec
 
 ### 1.2 Stream Processing Throughput
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| Records Processed | 28,450 | Variable | ✅ |
-| Processing Time | 143 minutes | Variable | ✅ |
-| Avg Throughput | 3.28 rec/sec | ≥ 3 rec/sec | ✅ |
-| Peak Throughput | 47.2 rec/sec | ≥ 5 rec/sec | ✅ |
+| Metric | Value | Target | 
+|--------|-------|--------|
+| Records Processed | 28,450 | Variable |
+| Processing Time | 143 minutes | Variable |
+| Avg Throughput | 3.28 rec/sec | ≥ 3 rec/sec |
+| Peak Throughput | 47.2 rec/sec | ≥ 5 rec/sec |
 
 **Measurement Query:**
 ```sql
@@ -74,11 +74,11 @@ Peak Throughput: 47.2 rec/sec (during batch processing)
 
 ### 1.3 Database Write Performance
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| Inserts/Batch | 100 | 100 | ✅ |
-| Batch Write Time | 215 ms | < 1000 ms | ✅ |
-| Inserts/Second | 465 | ≥ 100 | ✅ |
+| Metric | Value | Target |
+|--------|-------|--------|
+| Inserts/Batch | 100 | 100 | 
+| Batch Write Time | 215 ms | < 1000 ms | 
+| Inserts/Second | 465 | ≥ 100 | 
 
 **Actual Results:**
 ```
@@ -104,13 +104,13 @@ Breakdown:
 
 **Definition:** Time from event generation to database storage
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| Minimum Latency | 1.23 sec | < 5 sec | ✅ |
-| Average Latency | 3.45 sec | < 35 sec | ✅ |
-| P95 Latency | 5.78 sec | < 45 sec | ✅ |
-| P99 Latency | 7.12 sec | < 60 sec | ✅ |
-| Maximum Latency | 12.34 sec | < 90 sec | ✅ |
+| Metric | Value | Target | 
+|--------|-------|--------|
+| Minimum Latency | 1.23 sec | < 5 sec |
+| Average Latency | 3.45 sec | < 35 sec | 
+| P95 Latency | 5.78 sec | < 45 sec | 
+| P99 Latency | 7.12 sec | < 60 sec | 
+| Maximum Latency | 12.34 sec | < 90 sec |
 
 **Measurement Query:**
 ```sql
@@ -147,12 +147,12 @@ Latency Range    | Count  | Percentage
 
 ### 2.2 Component-Level Latency
 
-| Component | Average | Target | Status |
-|-----------|---------|--------|--------|
-| CSV Generation | 30.00 sec | 30 sec | ✅ |
-| File Detection | 42 ms | < 100 ms | ✅ |
-| Spark Processing | 2.15 sec | < 3 sec | ✅ |
-| DB Write | 215 ms | < 500 ms | ✅ |
+| Component | Average | Target |
+|-----------|---------|--------|
+| CSV Generation | 30.00 sec | 30 sec |
+| File Detection | 42 ms | < 100 ms | 
+| Spark Processing | 2.15 sec | < 3 sec |
+| DB Write | 215 ms | < 500 ms | 
 
 **Spark Processing Time (from logs):**
 
@@ -186,12 +186,12 @@ Std Dev: 0.17 seconds
 
 ### 3.1 CPU Usage
 
-| Container | Avg CPU % | Max CPU % | Target | Status |
-|-----------|-----------|-----------|--------|--------|
-| spark-master | 12.5% | 28.3% | < 50% | ✅ |
-| spark-worker-1 | 35.2% | 62.1% | < 80% | ✅ |
-| postgres | 8.7% | 18.4% | < 30% | ✅ |
-| data-generator | 2.1% | 5.3% | < 10% | ✅ |
+| Container | Avg CPU % | Max CPU % | Target | 
+|-----------|-----------|-----------|--------|
+| spark-master | 12.5% | 28.3% | < 50% | 
+| spark-worker-1 | 35.2% | 62.1% | < 80% |
+| postgres | 8.7% | 18.4% | < 30% |
+| data-generator | 2.1% | 5.3% | < 10% |
 
 **Measurement Command:**
 ```powershell
@@ -235,12 +235,12 @@ Timestamp            | Container      | CPU %
 
 ### 3.2 Memory Usage
 
-| Container | Avg Memory | Max Memory | Limit | Status |
-|-----------|------------|------------|-------|--------|
-| spark-master | 385 MB | 512 MB | 1 GB | ✅ |
-| spark-worker-1 | 1.2 GB | 1.65 GB | 2 GB | ✅ |
-| postgres | 145 MB | 198 MB | 512 MB | ✅ |
-| data-generator | 48 MB | 62 MB | 256 MB | ✅ |
+| Container | Avg Memory | Max Memory | Limit |
+|-----------|------------|------------|-------|
+| spark-master | 385 MB | 512 MB | 1 GB | 
+| spark-worker-1 | 1.2 GB | 1.65 GB | 2 GB | 
+| postgres | 145 MB | 198 MB | 512 MB |
+| data-generator | 48 MB | 62 MB | 256 MB |
 
 **Actual Results:**
 ```
@@ -274,12 +274,12 @@ OOM Kills: 0
 
 ### 3.3 Disk I/O
 
-| Metric | Value | Status |
-|--------|-------|--------|
-| CSV Files Written | 2,880 files | ✅ |
-| Total CSV Size | 85.4 MB | ✅ |
-| Database Size | 12.3 MB | ✅ |
-| Checkpoint Size | 4.2 MB | ✅ |
+| Metric | Value |
+|--------|-------|
+| CSV Files Written | 2,880 files | 
+| Total CSV Size | 85.4 MB | 
+| Database Size | 12.3 MB | 
+| Checkpoint Size | 4.2 MB |
 
 **Measurement Commands:**
 ```powershell
@@ -322,11 +322,11 @@ Disk I/O Performance:
 
 ### 3.4 Network Traffic
 
-| Container | Data Sent | Data Received | Status |
-|-----------|-----------|---------------|--------|
-| spark-master | 42.3 MB | 38.7 MB | ✅ |
-| spark-worker-1 | 38.7 MB | 42.5 MB | ✅ |
-| postgres | 15.2 MB | 28.4 MB | ✅ |
+| Container | Data Sent | Data Received | 
+|-----------|-----------|---------------|
+| spark-master | 42.3 MB | 38.7 MB |
+| spark-worker-1 | 38.7 MB | 42.5 MB |
+| postgres | 15.2 MB | 28.4 MB |
 
 **Actual Results:**
 ```
@@ -355,12 +355,12 @@ Peak: 18.3 MB/hour (during batch processing)
 
 ### 4.1 Uptime and Availability
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| Total Runtime | 24 hours | Variable | ✅ |
-| Downtime | 12 minutes | < 1% | ✅ |
-| Availability | 99.2% | > 99% | ✅ |
-| MTBF | 28+ hours | > 24 hours | ✅ |
+| Metric | Value | Target | 
+|--------|-------|--------|
+| Total Runtime | 24 hours | Variable | 
+| Downtime | 12 minutes | < 1% | 
+| Availability | 99.2% | > 99% | 
+| MTBF | 28+ hours | > 24 hours |
 
 **Actual Results:**
 ```
@@ -387,12 +387,12 @@ Event | Time | Duration | Cause | Impact
 
 ### 4.2 Error Rates
 
-| Error Type | Count | Rate | Target | Status |
-|------------|-------|------|--------|--------|
-| CSV Parse Errors | 0 | 0% | < 0.1% | ✅ |
-| Transformation Errors | 3 | 0.01% | < 0.1% | ✅ |
-| DB Write Errors | 0 | 0% | < 0.01% | ✅ |
-| Connection Errors | 5 | 0.02% | < 0.5% | ✅ |
+| Error Type | Count | Rate | Target | 
+|------------|-------|------|--------|
+| CSV Parse Errors | 0 | 0% | < 0.1% | 
+| Transformation Errors | 3 | 0.01% | < 0.1% | 
+| DB Write Errors | 0 | 0% | < 0.01% | 
+| Connection Errors | 5 | 0.02% | < 0.5% |
 
 **Measurement:**
 ```powershell
@@ -421,13 +421,13 @@ Warning Categories:
 
 ### 4.3 Data Quality
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| Records Generated | 28,800 | Variable | ✅ |
-| Records Processed | 28,450 | 28,800 | ⚠️ |
-| Records Stored | 28,450 | 28,450 | ✅ |
-| Data Loss % | 1.22% | 0% | ⚠️ |
-| Duplicate Records | 0 | 0 | ✅ |
+| Metric | Value | Target | 
+|--------|-------|--------|
+| Records Generated | 28,800 | Variable |
+| Records Processed | 28,450 | 28,800 | 
+| Records Stored | 28,450 | 28,450 | 
+| Data Loss % | 1.22% | 0% | 
+| Duplicate Records | 0 | 0 |
 
 **Measurement Query:**
 ```sql
@@ -658,14 +658,14 @@ Observations:
 
 **Test Scenario:** Sustained load for 24 hours
 
-| Metric | Result | Target | Pass/Fail |
-|--------|--------|--------|-----------|
-| Avg Throughput | 3.28 rec/s | ≥ 3 rec/s | ✅ PASS |
-| P95 Latency | 5.78 sec | < 45 sec | ✅ PASS |
-| Error Rate | 0.05% | < 0.1% | ✅ PASS |
-| CPU Usage | 25% avg | < 70% | ✅ PASS |
-| Memory Usage | 45% avg | < 80% | ✅ PASS |
-| Availability | 99.2% | > 99% | ✅ PASS |
+| Metric | Result | Target |
+|--------|--------|--------|
+| Avg Throughput | 3.28 rec/s | ≥ 3 rec/s |
+| P95 Latency | 5.78 sec | < 45 sec | 
+| Error Rate | 0.05% | < 0.1% | 
+| CPU Usage | 25% avg | < 70% | 
+| Memory Usage | 45% avg | < 80% |
+| Availability | 99.2% | > 99% | 
 
 **Load Test Conclusion:** System passed all performance criteria with significant headroom for growth.
 
@@ -673,13 +673,13 @@ Observations:
 
 **Test Scenario:** 2x normal load (batch interval reduced from 30s to 15s)
 
-| Metric | Result | Degradation | Acceptable? |
-|--------|--------|-------------|-------------|
-| Throughput | 6.42 rec/s | +96% (improvement) | ✅ YES |
-| Latency | 4.23 sec | +23% | ✅ YES |
-| Error Rate | 0.08% | +60% | ✅ YES |
-| CPU Usage | 58% | +132% | ✅ YES |
-| Memory Usage | 72% | +60% | ✅ YES |
+| Metric | Result | Degradation | 
+|--------|--------|-------------|
+| Throughput | 6.42 rec/s | +96% (improvement) |
+| Latency | 4.23 sec | +23% | 
+| Error Rate | 0.08% | +60% | 
+| CPU Usage | 58% | +132% | 
+| Memory Usage | 72% | +60% |
 
 **Stress Test Conclusion:** System handles 2x load effectively with acceptable degradation. Ready for scaling to meet higher demands.
 
@@ -687,7 +687,7 @@ Observations:
 
 ## 9. Conclusion
 
-### Overall Performance Rating: ✅ **Excellent**
+### Overall Performance Rating: **Excellent**
 
 The real-time e-commerce data pipeline demonstrates strong performance characteristics across all measured dimensions:
 
