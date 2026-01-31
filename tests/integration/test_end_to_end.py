@@ -1,6 +1,5 @@
 """
 End-to-end integration tests for the data pipeline.
-These tests require Docker containers to be running.
 
 Run with: pytest tests/integration/ -v
 """
