@@ -1,4 +1,5 @@
 # Performance Metrics Report
+
 ## Real-Time E-Commerce Data Pipeline
 
 **Project:** Real-Time Data Ingestion Using Spark Structured Streaming & PostgreSQL  
@@ -13,6 +14,7 @@
 This report documents the performance characteristics of the real-time e-commerce data pipeline, measuring throughput, latency, resource utilization, and system reliability over a 24-hour operational period.
 
 ### Key Findings
+
 - **Throughput:** 3.28 records/second sustained
 - **Latency:** 3.45 seconds average end-to-end
 - **Reliability:** 99.2% uptime during testing
@@ -26,7 +28,7 @@ This report documents the performance characteristics of the real-time e-commerc
 
 ### 1.1 Data Generation Rate
 
-| Metric | Value | Target | 
+| Metric | Value | Target |
 |--------|-------|--------|
 | Batch Size | 100 events |  
 | Batch Interval | 30 seconds | 30 seconds |
@@ -36,6 +38,7 @@ This report documents the performance characteristics of the real-time e-commerc
 **Measurement Period:** 5 minutes (300 seconds)
 
 **Actual Results:**
+
 ```
 Start Time: 2026-01-30 14:00:00
 End Time: 2026-01-30 14:05:00
@@ -46,7 +49,7 @@ Events/Second: 3.30 events/sec
 
 ### 1.2 Stream Processing Throughput
 
-| Metric | Value | Target | 
+| Metric | Value | Target |
 |--------|-------|--------|
 | Records Processed | 28,450 | Variable |
 | Processing Time | 143 minutes | Variable |
@@ -54,6 +57,7 @@ Events/Second: 3.30 events/sec
 | Peak Throughput | 47.2 rec/sec | ≥ 5 rec/sec |
 
 **Measurement Query:**
+
 ```sql
 SELECT 
   COUNT(*) as total_records,
@@ -63,6 +67,7 @@ FROM ecommerce_events;
 ```
 
 **Actual Results:**
+
 ```
 Total Records Processed: 28,450
 Time Span (seconds): 8,580 seconds (2.38 hours)
@@ -76,11 +81,12 @@ Peak Throughput: 47.2 rec/sec (during batch processing)
 
 | Metric | Value | Target |
 |--------|-------|--------|
-| Inserts/Batch | 100 | 100 | 
-| Batch Write Time | 215 ms | < 1000 ms | 
-| Inserts/Second | 465 | ≥ 100 | 
+| Inserts/Batch | 100 | 100 |
+| Batch Write Time | 215 ms | < 1000 ms |
+| Inserts/Second | 465 | ≥ 100 |
 
 **Actual Results:**
+
 ```
 Average Batch Insert Time: 215 ms
 Minimum Insert Time: 178 ms
@@ -104,15 +110,16 @@ Breakdown:
 
 **Definition:** Time from event generation to database storage
 
-| Metric | Value | Target | 
+| Metric | Value | Target |
 |--------|-------|--------|
 | Minimum Latency | 1.23 sec | < 5 sec |
-| Average Latency | 3.45 sec | < 35 sec | 
-| P95 Latency | 5.78 sec | < 45 sec | 
-| P99 Latency | 7.12 sec | < 60 sec | 
+| Average Latency | 3.45 sec | < 35 sec |
+| P95 Latency | 5.78 sec | < 45 sec |
+| P99 Latency | 7.12 sec | < 60 sec |
 | Maximum Latency | 12.34 sec | < 90 sec |
 
 **Measurement Query:**
+
 ```sql
 SELECT 
   MIN(EXTRACT(EPOCH FROM (processing_timestamp - ingestion_timestamp))) as min_latency,
@@ -124,6 +131,7 @@ FROM ecommerce_events;
 ```
 
 **Actual Results:**
+
 ```
 Minimum Latency: 1.23 seconds
 Average Latency: 3.45 seconds
@@ -133,6 +141,7 @@ Maximum Latency: 12.34 seconds
 ```
 
 **Latency Distribution:**
+
 ```
 Latency Range    | Count  | Percentage
 -----------------|--------|------------
@@ -150,13 +159,14 @@ Latency Range    | Count  | Percentage
 | Component | Average | Target |
 |-----------|---------|--------|
 | CSV Generation | 30.00 sec | 30 sec |
-| File Detection | 42 ms | < 100 ms | 
+| File Detection | 42 ms | < 100 ms |
 | Spark Processing | 2.15 sec | < 3 sec |
-| DB Write | 215 ms | < 500 ms | 
+| DB Write | 215 ms | < 500 ms |
 
 **Spark Processing Time (from logs):**
 
 **Actual Results:**
+
 ```
 Batch | Processing Time (s) | Records/sec
 ------|--------------------|--------------
@@ -186,20 +196,22 @@ Std Dev: 0.17 seconds
 
 ### 3.1 CPU Usage
 
-| Container | Avg CPU % | Max CPU % | Target | 
+| Container | Avg CPU % | Max CPU % | Target |
 |-----------|-----------|-----------|--------|
-| spark-master | 12.5% | 28.3% | < 50% | 
+| spark-master | 12.5% | 28.3% | < 50% |
 | spark-worker-1 | 35.2% | 62.1% | < 80% |
 | postgres | 8.7% | 18.4% | < 30% |
 | data-generator | 2.1% | 5.3% | < 10% |
 
 **Measurement Command:**
+
 ```powershell
 # Collected stats every 10 seconds for 5 minutes (30 samples)
 docker stats --no-stream
 ```
 
 **Actual Results:**
+
 ```
 Container Resource Usage (Averaged over 30 samples):
 
@@ -237,12 +249,13 @@ Timestamp            | Container      | CPU %
 
 | Container | Avg Memory | Max Memory | Limit |
 |-----------|------------|------------|-------|
-| spark-master | 385 MB | 512 MB | 1 GB | 
-| spark-worker-1 | 1.2 GB | 1.65 GB | 2 GB | 
+| spark-master | 385 MB | 512 MB | 1 GB |
+| spark-worker-1 | 1.2 GB | 1.65 GB | 2 GB |
 | postgres | 145 MB | 198 MB | 512 MB |
 | data-generator | 48 MB | 62 MB | 256 MB |
 
 **Actual Results:**
+
 ```
 Memory Usage Trends (24-hour period):
 
@@ -276,12 +289,13 @@ OOM Kills: 0
 
 | Metric | Value |
 |--------|-------|
-| CSV Files Written | 2,880 files | 
-| Total CSV Size | 85.4 MB | 
-| Database Size | 12.3 MB | 
+| CSV Files Written | 2,880 files |
+| Total CSV Size | 85.4 MB |
+| Database Size | 12.3 MB |
 | Checkpoint Size | 4.2 MB |
 
 **Measurement Commands:**
+
 ```powershell
 # CSV files
 (Get-ChildItem "data\streaming" *.csv | Measure-Object -Property Length -Sum).Sum / 1MB
@@ -295,6 +309,7 @@ SELECT pg_size_pretty(pg_database_size('ecommerce_events'));"
 ```
 
 **Actual Results:**
+
 ```
 Total CSV Volume: 85.4 MB (2,880 files)
   - Active in streaming/: 15 files (0.45 MB)
@@ -322,13 +337,14 @@ Disk I/O Performance:
 
 ### 3.4 Network Traffic
 
-| Container | Data Sent | Data Received | 
+| Container | Data Sent | Data Received |
 |-----------|-----------|---------------|
 | spark-master | 42.3 MB | 38.7 MB |
 | spark-worker-1 | 38.7 MB | 42.5 MB |
 | postgres | 15.2 MB | 28.4 MB |
 
 **Actual Results:**
+
 ```
 24-Hour Network Traffic:
 
@@ -355,14 +371,15 @@ Peak: 18.3 MB/hour (during batch processing)
 
 ### 4.1 Uptime and Availability
 
-| Metric | Value | Target | 
+| Metric | Value | Target |
 |--------|-------|--------|
-| Total Runtime | 24 hours | Variable | 
-| Downtime | 12 minutes | < 1% | 
-| Availability | 99.2% | > 99% | 
+| Total Runtime | 24 hours | Variable |
+| Downtime | 12 minutes | < 1% |
+| Availability | 99.2% | > 99% |
 | MTBF | 28+ hours | > 24 hours |
 
 **Actual Results:**
+
 ```
 Start Time: 2026-01-30 14:00:00
 End Time: 2026-01-31 14:00:00
@@ -376,6 +393,7 @@ MTBF: 28+ hours (no failures after initial setup)
 ```
 
 **Downtime Events:**
+
 ```
 Event | Time | Duration | Cause | Impact
 ------|------|----------|-------|--------
@@ -387,19 +405,21 @@ Event | Time | Duration | Cause | Impact
 
 ### 4.2 Error Rates
 
-| Error Type | Count | Rate | Target | 
+| Error Type | Count | Rate | Target |
 |------------|-------|------|--------|
-| CSV Parse Errors | 0 | 0% | < 0.1% | 
-| Transformation Errors | 3 | 0.01% | < 0.1% | 
-| DB Write Errors | 0 | 0% | < 0.01% | 
+| CSV Parse Errors | 0 | 0% | < 0.1% |
+| Transformation Errors | 3 | 0.01% | < 0.1% |
+| DB Write Errors | 0 | 0% | < 0.01% |
 | Connection Errors | 5 | 0.02% | < 0.5% |
 
 **Measurement:**
+
 ```powershell
 docker logs ecommerce-spark-master 2>&1 | Select-String "ERROR|WARN" | Measure-Object
 ```
 
 **Actual Results:**
+
 ```
 Total Log Entries: 15,420
 Total Warnings: 127 (0.82%)
@@ -421,15 +441,16 @@ Warning Categories:
 
 ### 4.3 Data Quality
 
-| Metric | Value | Target | 
+| Metric | Value | Target |
 |--------|-------|--------|
 | Records Generated | 28,800 | Variable |
-| Records Processed | 28,450 | 28,800 | 
-| Records Stored | 28,450 | 28,450 | 
-| Data Loss % | 1.22% | 0% | 
+| Records Processed | 28,450 | 28,800 |
+| Records Stored | 28,450 | 28,450 |
+| Data Loss % | 1.22% | 0% |
 | Duplicate Records | 0 | 0 |
 
 **Measurement Query:**
+
 ```sql
 SELECT 
   (SELECT COUNT(*) FROM ecommerce_events) as stored_count,
@@ -439,6 +460,7 @@ FROM ecommerce_events;
 ```
 
 **Actual Results:**
+
 ```
 Expected Records: 28,800 (288 batches × 100 records)
 Actual Records in DB: 28,450
@@ -476,10 +498,11 @@ Data Quality Checks:
 | Worker Memory | 1.2 GB (60% used) | 2 GB | 40% unused |
 
 **Current Bottlenecks:**
+
 1. **Data Generation Rate** (primary bottleneck)
    - Fixed at 100 events/30s
    - Can be increased by reducing batch interval
-   
+
 2. **Spark Worker Processing** (secondary)
    - 35% average utilization
    - Can handle 2-3x current load
@@ -500,22 +523,26 @@ Data Quality Checks:
 **Scaling Recommendations:**
 
 **Short-term (Current Architecture):**
+
 - Reduce batch interval: 30s → 15s (2x improvement)
 - Increase batch size: 100 → 200 (2x improvement)
 - Combined: 4x improvement = 13 events/sec
 
 **Medium-term (Add Resources):**
+
 - Add 2 more Spark workers
 - Increase worker memory to 4GB each
 - Expected: 20-25 events/sec
 
 **Long-term (Architecture Changes):**
+
 - Replace file-based streaming with Kafka
 - Add multiple data generator instances
 - Implement Spark Structured Streaming at scale
 - Expected: 500+ events/sec
 
 **Bottleneck Analysis:**
+
 ```
 Current Bottleneck: Data Generation (intentional design limit)
 Recommendation: For production, replace batch file generation with Kafka producer
@@ -537,6 +564,7 @@ Implementation Effort: Medium (2-3 days)
 | Error Rate | 0.05% | < 0.1% | 50% better | Excellent |
 
 **Notes:**
+
 - Throughput "limitation" is intentional (prototype/demo scale)
 - Production systems with Kafka achieve 10,000-100,000+ events/sec
 - Our latency performance exceeds industry standards
@@ -567,6 +595,7 @@ Observations:
 ### 7.1 Immediate Actions
 
 **[Priority 1] Implement Checkpointing Cleanup**
+
 - **Issue:** Checkpoint directory growing continuously (4.2 MB)
 - **Impact:** Eventually will consume excessive disk space
 - **Solution:** Implement checkpoint cleanup policy (keep last 10 checkpoints)
@@ -575,6 +604,7 @@ Observations:
 - **Code:** `spark.conf.set("spark.sql.streaming.minBatchesToRetain", "10")`
 
 **[Priority 2] Optimize Batch Size**
+
 - **Issue:** Fixed 100-record batches may not be optimal
 - **Impact:** Could process larger batches more efficiently
 - **Solution:** Test batch sizes of 200, 500, 1000 records
@@ -582,6 +612,7 @@ Observations:
 - **Implementation:** 2 hours (testing + configuration)
 
 **[Priority 3] Add Connection Pooling**
+
 - **Issue:** New JDBC connection for each batch
 - **Impact:** ~15ms overhead per batch
 - **Solution:** Implement HikariCP connection pooling
@@ -591,6 +622,7 @@ Observations:
 ### 7.2 Long-term Improvements
 
 **1. Infrastructure:**
+
 - **Add more Spark workers** for horizontal scaling
   - Current: 1 worker (2 cores, 2GB)
   - Proposed: 3 workers (6 cores, 6GB total)
@@ -607,6 +639,7 @@ Observations:
   - Expected: Separate read/write workloads
 
 **2. Code Optimization:**
+
 - **Batch database writes** in larger transactions
   - Current: 100 records per transaction
   - Proposed: 500-1000 records per transaction
@@ -621,6 +654,7 @@ Observations:
   - Expected: 50% faster analytical queries
 
 **3. Monitoring & Observability:**
+
 - **Add Prometheus** for metrics collection
   - Implement custom metrics (events/sec, latency, errors)
   - Retention: 30 days
@@ -638,6 +672,7 @@ Observations:
   - Automated incident response
 
 **4. Architecture Evolution:**
+
 - **Replace file-based streaming with Kafka**
   - Proper message queue with guarantees
   - Expected: 100x throughput capability
@@ -661,11 +696,11 @@ Observations:
 | Metric | Result | Target |
 |--------|--------|--------|
 | Avg Throughput | 3.28 rec/s | ≥ 3 rec/s |
-| P95 Latency | 5.78 sec | < 45 sec | 
-| Error Rate | 0.05% | < 0.1% | 
-| CPU Usage | 25% avg | < 70% | 
+| P95 Latency | 5.78 sec | < 45 sec |
+| Error Rate | 0.05% | < 0.1% |
+| CPU Usage | 25% avg | < 70% |
 | Memory Usage | 45% avg | < 80% |
-| Availability | 99.2% | > 99% | 
+| Availability | 99.2% | > 99% |
 
 **Load Test Conclusion:** System passed all performance criteria with significant headroom for growth.
 
@@ -673,12 +708,12 @@ Observations:
 
 **Test Scenario:** 2x normal load (batch interval reduced from 30s to 15s)
 
-| Metric | Result | Degradation | 
+| Metric | Result | Degradation |
 |--------|--------|-------------|
 | Throughput | 6.42 rec/s | +96% (improvement) |
-| Latency | 4.23 sec | +23% | 
-| Error Rate | 0.08% | +60% | 
-| CPU Usage | 58% | +132% | 
+| Latency | 4.23 sec | +23% |
+| Error Rate | 0.08% | +60% |
+| CPU Usage | 58% | +132% |
 | Memory Usage | 72% | +60% |
 
 **Stress Test Conclusion:** System handles 2x load effectively with acceptable degradation. Ready for scaling to meet higher demands.
@@ -692,6 +727,7 @@ Observations:
 The real-time e-commerce data pipeline demonstrates strong performance characteristics across all measured dimensions:
 
 **Strengths:**
+
 1. **Exceptional Latency Performance**
    - P95 latency of 5.78s is 90% better than industry standard (60s)
    - 84.9% of events processed within 5 seconds
@@ -718,6 +754,7 @@ The real-time e-commerce data pipeline demonstrates strong performance character
    - Well-architected for horizontal scaling
 
 **Weaknesses:**
+
 1. **Limited Throughput (by design)**
    - Current: 3.28 events/sec
    - This is intentional for demo/prototype purposes
@@ -733,6 +770,7 @@ The real-time e-commerce data pipeline demonstrates strong performance character
    - Recommendation: Migrate to Kafka/Kinesis
 
 **Final Recommendation:**
+
 ```
  APPROVED FOR PRODUCTION (with conditions)
 
@@ -753,5 +791,3 @@ Current State: Excellent foundation for production evolution
 Time to Production-Ready: 2-3 weeks of additional development
 Risk Assessment: Low (well-tested, proven architecture)
 ```
-
-
