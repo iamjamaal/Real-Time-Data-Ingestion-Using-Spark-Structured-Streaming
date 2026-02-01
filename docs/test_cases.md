@@ -115,23 +115,6 @@ Verify that Spark Structured Streaming detects and processes new CSV files
 | Worker RAM | 1,024 MiB |
 | Status | RUNNING |
 
-#### Step 2.2: Verify File Monitoring
-
-**Expected Result:**
-- Logs show files being listed
-- Log entries like: "Listed X files"
-- No "File not found" errors
-
-
-
-#### Step 2.3: Confirm Batch Processing
-
-**Expected Result:**
-- Messages like: "✓ Batch X: Y records in Z.ZZs"
-- Batch numbers incrementing
-- Processing time reasonable (< 5 seconds per batch)
-
-
 
 ## Test Case 3: Data Transformations
 
