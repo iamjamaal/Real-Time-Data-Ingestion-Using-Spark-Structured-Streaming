@@ -24,6 +24,8 @@ services:
       retries: 5
     restart: unless-stopped
 
+
+
   # Spark Master
   spark-master:
     build:
@@ -56,6 +58,8 @@ services:
       start_period: 40s
     restart: unless-stopped
 
+
+
   # Spark Worker 1
   spark-worker-1:
     build:
@@ -83,6 +87,8 @@ services:
       retries: 3
       start_period: 40s
     restart: unless-stopped
+
+
 
 
   # Spark Worker 2 
@@ -117,6 +123,8 @@ services:
 
 
 
+
+
 # Spark Streaming Job
   spark-streaming:
     build:
@@ -135,6 +143,8 @@ services:
       data-generator:
         condition: service_started
     restart: unless-stopped
+
+
 
   # Data Generator
   data-generator:
@@ -157,6 +167,8 @@ services:
     restart: unless-stopped
 
 
+
+
   # Airflow PostgreSQL Database
   airflow-postgres:
     image: postgres:15-alpine
@@ -177,6 +189,8 @@ services:
     restart: unless-stopped
     profiles:
       - airflow
+
+
 
 
   # Airflow Webserver
@@ -225,6 +239,8 @@ services:
     restart: unless-stopped
     profiles:
       - airflow
+
+
 
 
   # Airflow Scheduler
