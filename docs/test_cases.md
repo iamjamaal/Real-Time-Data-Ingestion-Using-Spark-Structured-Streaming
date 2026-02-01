@@ -309,38 +309,7 @@ FROM ecommerce_events;"
 
 > Run the explicit aggregate query for overall records_per_second across the full dataset.
 
-#### Step 5.2: Analyze Processing Latency
-```powershell
-docker exec ecommerce-postgres psql -U spark_user -d ecommerce_events -c "
-SELECT 
-  MIN(EXTRACT(EPOCH FROM (processing_timestamp - ingestion_timestamp))) as min_latency,
-  AVG(EXTRACT(EPOCH FROM (processing_timestamp - ingestion_timestamp))) as avg_latency,
-  MAX(EXTRACT(EPOCH FROM (processing_timestamp - ingestion_timestamp))) as max_latency,
-  PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (processing_timestamp - ingestion_timestamp))) as p95_latency
-FROM ecommerce_events;"
 
-
-**Expected Result:**
-- Batch processing time < 5 seconds (steady state)
-- Consistent processing times
-- No failed batches
-
-
-
-#### Step 5.4: Monitor Resource Usage
-```powershell
-docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}"
-```
-
-**Expected Result:**
-- CPU usage < 50% per container
-- Memory usage within allocated limits
-- No containers restarting
-
-> All containers confirmed healthy via `docker ps`. Run `docker stats` to capture CPU and memory usage.
-batch.
-
----
 
 ## Test Case 6: Error Handling
 
@@ -348,8 +317,8 @@ batch.
 Verify that the system handles errors gracefully
 
 ### Prerequisites
-- System running normally ✅
-- Admin access to containers ✅
+- System running normally 
+- Admin access to containers 
 
 ### Test Steps
 
