@@ -24,6 +24,7 @@ default_args = {
     'execution_timeout': timedelta(hours=2)
 }
 
+
 def check_spark_job_status():
     """
     Verify Spark streaming job is running.
@@ -47,6 +48,7 @@ def check_spark_job_status():
     except Exception as e:
         logger.error(f"Spark health check failed: {str(e)}")
         raise
+
 
 def verify_data_ingestion():
     """
@@ -73,6 +75,7 @@ def verify_data_ingestion():
     
     logger.info(f"Recent records: {result[0]}")
     return True
+
 
 def calculate_pipeline_metrics():
     """
@@ -111,6 +114,7 @@ def calculate_pipeline_metrics():
     
     hook.run(metrics_query)
     logger.info("Metrics calculated and stored")
+
 
 # DAG Definition
 with DAG(
@@ -174,6 +178,7 @@ with DAG(
         """
     )
     
+    
     # Task 5: Cleanup Old Data (Optional)
     cleanup_old_data = PostgresOperator(
         task_id='cleanup_old_archived_files',
@@ -184,6 +189,7 @@ with DAG(
         WHERE timestamp < NOW() - INTERVAL '90 days'
         """
     )
+    
     
     # Task Dependencies
     check_spark >> verify_ingestion >> [calc_metrics, data_quality]

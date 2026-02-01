@@ -33,31 +33,6 @@ docker-compose --version
 
 ---
 
-## Installation
-
-### 1. Download Project Files
-All project files should be in your project directory:
-```
-Real-Time-Data-Ingestion-Using-Spark-Structured-Streaming/
-├── docker/
-│   ├── docker-compose.yml
-│   └── Dockerfile.data-generator
-├── src/
-│   ├── data_generator/
-│   │   ├── data_generator.py
-│   │   └── requirements.txt
-│   └── spark_jobs/
-│       └── streaming_to_postgres.py
-├── sql/
-│   └── postgres_setup.sql
-├── data/
-│   ├── streaming/
-│   ├── archive/
-│   └── checkpoints/
-└── jars/
-    └── postgresql-42.6.0.jar
-```
-
 ### 2. Navigate to Project Directory
 ```powershell
 cd C:\Path\To\Real-Time-Data-Ingestion-Using-Spark-Structured-Streaming
