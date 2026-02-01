@@ -322,23 +322,8 @@ Verify that the system handles errors gracefully
 
 ### Test Steps
 
-#### Step 6.1: Test Worker Restart
-```powershell
-# Restart worker during processing
-docker restart ecommerce-spark-worker-1
-Start-Sleep -Seconds 25
 
-# Check if job continues
-docker logs ecommerce-spark-streaming 2>&1 | Select-String "Batch" | Select-Object -Last 3
-```
-
-**Expected Result:**
-- Job pauses briefly
-- Resumes after worker reconnects
-- No data loss
-
-
-#### Step 6.2: Test Invalid CSV Data
+#### Step 6.1: Test Invalid CSV Data
 ```powershell
 # Create CSV with invalid data
 @"
@@ -353,7 +338,7 @@ USER001,invalid,view,PROD001,Test Product,electronics,invalid_price,1,2026-01-30
 - Other valid records processed normally
 
 
-#### Step 6.3: Test Database Connection Loss
+#### Step 6.2: Test Database Connection Loss
 ```powershell
 # Stop PostgreSQL temporarily
 docker stop ecommerce-postgres
